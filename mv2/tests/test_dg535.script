@@ -1,0 +1,90 @@
+#!/usr/bin/bash
+
+#
+#DG535 Simulator
+#
+
+#This is a series of automated tests for the DG535 db records
+#Run start_ioc_tty.script:
+#1) Set up two connected tty ports using socat (Called COM8 and COM9)
+#2) connect IOC at one end, COM8
+
+#This script will:
+#3) Set port parameters. Connect awk script that simulates the mks at the other, COM9. 
+#4) Check that db gives the correct resonse via caput/caget and using awk
+#5) Restart with a different awk script with different test conditions
+
+ENVIRON=../../
+ENVIRONS=set_environment.script
+WHOAMI=`whoami`
+USER_DELAY=0
+ERROR_RECORD=""
+
+#Local port parameters must match the st file: Set them here... 
+stty -F $HOME/COM9 sane
+stty -F $HOME/COM9 9600 cs8 -parodd -echo onlcr
+
+
+#Kill old gawk background processes attached to tty
+
+for PS in $( ps -u $WHOAMI | grep "gawk" | awk '{print $1}' ); do echo "Killing gawk $PS"; kill $PS; wait; done
+
+#Delimiter for test file used by awk
+OLDIFS=$IFS
+IFS="|"
+# Look for test
+INPUTF=dg535_tests.csv
+[ ! -f $INPUTF ] && { echo "$INPUTF file for tests not found"; exit 99; }
+
+# Start awk simulation. Get PID
+
+
+
+
+# Run tests
+CWD=$PWD
+cd $ENVIRON
+source $ENVIRONS
+cd $CWD
+OLDPID=0
+while read PV PFIELD SDOUT PVOUT TYPE
+do
+
+ #Kill any old gawk, ignore output
+ [ $OLDPID -gt "0" ] && { kill $OLDPID > /dev/null 2> /dev/null; wait $OLDPID 2>/dev/null; }
+
+ #Ignore # and empty lines
+ PVTEST=`echo $PV | cut -c1`
+ [ -z "$PVTEST" ] && { continue; }
+ [ "$PVTEST" = "#" ] && { continue; }
+
+ #Show what was read in
+
+
+ # Read any user dealys
+ [ "$PV" = "SETDELAY" ] && { USER_DELAY=$PFIELD; echo "DELAY SET TO: "$USER_DELAY; continue; }
+ echo $PV $PFIELD $SDOUT $PVOUT $TYPE
+ #Flush error record
+
+
+ #Start gawk simulation with variables from the file
+ gawk 'BEGIN { FS = "\n" } ;{print "Sim In: "$0 >> "/dev/tty"; print "'$SDOUT'"; print "Sim Out: '$SDOUT'" >>"/dev/tty" }' $HOME/COM9 > $HOME/COM9 &
+ #Record this PID
+ OLDPID=$! 
+
+ #Use caput to trigger the record. caget does not trigger the record, only reads it.
+ #If there is a delay, then wait to read the output
+
+ caput  `echo $PV | awk '{print $1}'` `echo $PV | awk '{print $2}'` 2> /dev/null > /dev/null
+ sleep $USER_DELAY"s"
+ TESTOUT=`caget -d$TYPE $PFIELD | awk '/Value/{print substr($0, index($0,$2))}'`
+
+ echo "IOC responded" $TESTOUT "and user expected" $PVOUT
+
+ #Check that the record returned what you expected
+ [ "$TESTOUT" = "$PVOUT" ] && { echo "<OK> $PFIELD"; } || { echo "************Error $PFIELD"; }
+
+done < $INPUTF
+
+#Kill last gawk
+[ $OLDPID -gt "0" ] && { kill $OLDPID > /dev/null 2> /dev/null; wait $OLDPID 2>/dev/null; }

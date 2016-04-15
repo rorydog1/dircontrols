@@ -1,0 +1,80 @@
+# There is no CPP update from trigger because it value is always 0!!!!
+
+record(calc, "$(device):ISBEAM")
+{
+    field(INPA, "ERL-PS-CRATE-02:M14:STA.B0") # Open=0
+    field(INPB, "INJ-LSR-SHUT-02:Sta") # Open=1
+    field(INPC, "INJ-GUN-HVPSU-01:HT") # On=1
+    field(INPD, "$(trigger) CPP")
+    field(CALC, "A=0&B=1&C=1")
+}
+
+#Start values
+record(ai,"$(device):TLC")
+{
+    field(FLINK,"$(device):TLC0 PP")
+}
+
+#Index start value
+record(ai,"$(device):TLIC")
+{
+    field(VAl, "8")
+}
+
+
+### Calculate NELM
+
+##Case 1: A >= 50
+record(calc, "$(device):TLC0")
+{
+    field(INPA, "INJ-LSR-DLY-01:BCAL CPP")
+    field(CALC, "A>=50?FLOOR((A/10)+0.00001)-2:0")
+    field(OOPT, "When Non-zero")
+    field(DOPT, "Use CALC")
+    field(OUT,"$(device):TLC")
+    field(FLNK, "$(device):TLC1 PP")   
+}
+
+##Case 2: 40 <= A < 50
+record(calcout, "$(device):TLC1")
+{
+    field(INPA, "INJ-LSR-DLY-01:BCAL CPP")
+    field(CALC, "(A>=40)&&(A<50)?3:0")
+    field(OOPT, "When Zero")
+    field(DOPT, "Use CALC")
+    field(OUT,"$(device):TLC")
+    field(FLNK, "$(device):TLC2 PP")  
+}
+
+#Case 3: 30 <= A < 40
+record(calcout, "$(device):TLC2")
+{
+    field(INPA, "INJ-LSR-DLY-01:BCAL CPP")
+    field(CALC, "(A>=30)&&(A<40)?2:0")
+    field(OOPT, "When Zero")
+    field(DOPT, "Use CALC")
+    field(OUT,"$(device):TLC")
+    field(FLNK, "$(device):TLC3 PP")  
+}
+
+#Case 4: 20 <= A < 30
+record(calcout, "$(device):TLC3")
+{
+    field(INPA, "INJ-LSR-DLY-01:BCAL CPP")
+    field(CALC, "(A>=20)&&(A<30)?3:0")
+    field(OOPT, "When Zero")
+    field(DOPT, "Use CALC")
+    field(OUT,"$(device):TLC")
+    field(FLNK, "$(device):TLC4 PP")
+}
+
+#Case 5: A <20
+record(calcout, "$(device):TLC4")
+{
+    field(INPA, "INJ-LSR-DLY-01:BCAL CPP")
+    field(CALC, "(A<20)?3:1")
+    field(OOPT, "When Zero")
+    field(DOPT, "Use CALC")
+    field(OUT,"$(device):TLC")
+}
+

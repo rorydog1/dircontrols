@@ -1,5 +1,5 @@
 epicsEnvSet("ARCH","linux-x86_64")
 epicsEnvSet("IOC","iocvgauge")
-epicsEnvSet("TOP","/home/controls/ioc/vgauge")
-epicsEnvSet("ASYN","/home/controls/support/asyn4-27")
-epicsEnvSet("EPICS_BASE","/home/epics/base")
+epicsEnvSet("TOP","/home/rory/Desktop/controls/ioc/vgauge")
+epicsEnvSet("ASYN","/home/rory/Desktop/controls/support/asyn4-27")
+epicsEnvSet("EPICS_BASE","/home/rory/Desktop/epics/base")

@@ -1,2 +1,4 @@
-node.o: ../node.c ../types.h /home/epics/base/include/epicsVersion.h \
- ../seq_static_assert.h ../node.h ../main.h
+# DO NOT EDIT: This file created by mkmf.pl,v 1.5 2002/03/25 21:33:24 jba Exp $ 
+
+
+

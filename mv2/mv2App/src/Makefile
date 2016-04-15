@@ -1,0 +1,84 @@
+TOP=../..
+
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS BELOW HERE
+
+# xxxRecord.h will be created from xxxRecord.dbd
+#DBDINC += xxxRecord
+
+# Install xxxSupport.dbd into <top>/dbd
+DBD += xxxSupport.dbd
+
+# Build an IOC support library
+LIBRARY_IOC += mv2Support
+
+# Compile and add the code to the support library
+#mv2Support_SRCS += xxxRecord.c
+#mv2Support_SRCS += devXxxSoft.c
+
+# Link locally-provided code into the support library,
+# rather than directly into the IOC application.
+# This is required for Windows DLL builds.
+#mv2Support_SRCS += dbSubExample.c
+#mv2Support_SRCS += mv2Hello.c
+#mv2Support_SRCS += initTrace.c
+mv2Support_SRCS += rgamv2.cpp
+
+mv2Support_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+# Build the IOC application
+PROD_IOC = mv2
+
+# mv2.dbd will be created and installed
+DBD += mv2.dbd
+
+# mv2.dbd will include these files:
+mv2_DBD += base.dbd
+mv2_DBD += drvAsynIPPort.dbd
+mv2_DBD += asyn.dbd
+#mv2_DBD += dbSubExample.dbd
+#mv2_DBD += mv2Hello.dbd
+#mv2_DBD += initTrace.dbd
+mv2_DBD += rgamv2Include.dbd
+#mv2_DBD += rgaInclude.dbd
+
+# mv2_registerRecordDeviceDriver.cpp derives from mv2.dbd
+mv2_SRCS += mv2_registerRecordDeviceDriver.cpp
+
+# Build the main IOC entry point where needed
+mv2_SRCS_DEFAULT += mv2Main.cpp
+mv2_SRCS_vxWorks += -nil-
+
+# Add support from base/src/vxWorks if needed
+#mv2_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+
+# Link in the code from our support library
+mv2_LIBS += mv2Support
+mv2_LIBS += asyn
+
+# To build SNL programs, SNCSEQ must be defined
+# in the <top>/configure/RELEASE file
+#ifneq ($(SNCSEQ),)
+#    # Build sncExample into mv2Support
+#    sncExample_SNCFLAGS += +r
+#    mv2_DBD += sncExample.dbd
+#    mv2Support_SRCS += sncExample.stt
+#    mv2Support_LIBS += seq pv
+#    mv2_LIBS += seq pv
+
+    # Build sncProgram as a standalone program
+#    PROD_HOST += sncProgram
+#    sncProgram_SNCFLAGS += +m
+#    sncProgram_SRCS += sncProgram.st
+#    sncProgram_LIBS += seq pv
+#    sncProgram_LIBS += $(EPICS_BASE_HOST_LIBS)
+#endif
+
+# Finally link IOC to the EPICS Base libraries
+mv2_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD EXTRA GNUMAKE RULES BELOW HERE
+

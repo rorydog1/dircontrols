@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+
+#
+#MV2 Simulator
+#
+#This is a series of automated tests for the MV2 db records
+#Run this script to
+#1) Set up two connected tty ports using socat (Called COM8 and COM9)
+#2) connect IOC at one end, COM8
+
+#test_mks.script can be run multiple times and will:
+#3) Set port parameters. Connect awk script that simulates the mks at the other, COM9. 
+#4) Check that db gives the correct resonse via caput/caget and using awk
+#5) Restart with a different awk script with different test conditions
+
+IOCNAME=mv2
+IOCPATH=../bin/linux-x86_64
+IOCTESTP=$PWD/../iocBoot/iocmv2/
+IOCTEST=st.cmd
+ENVIRON=../../
+ENVIRONS=set_environment.script
+WHOAMI=`whoami`
+
+USE_LIVE_PORT=1 #Use the real serial port instead of the simulation if set to 1
+
+#Kill old background processes
+rm -f temp.st
+for PS in $( ps -u $WHOAMI | grep socat | awk '{print $1}' ); do echo "Killing socat $PS"; kill $PS; wait; done
+for PS in $( ps -u $WHOAMI | grep $IOCNAME | awk '{print $1}' ); do echo "Killing $IOCNAME $PS"; kill $PS; wait; done
+
+#Connect tty
+socat PTY,link=$HOME/COM8 PTY,link=$HOME/COM9 &
+
+
+# Start IOC
+CWD=$PWD
+cd $ENVIRON
+source $ENVIRONS
+cd $IOCTESTP
+
+#Change IOC serial port
+sed "s|/dev/tty.*\"|$HOME/COM8\"|" $IOCTEST > temp.st
+#Run IOC
+
+[ $USE_LIVE_PORT -lt "1" ] && { echo "Simulation Mode..."; $IOCPATH/$IOCNAME temp.st; } || { echo "LIVE MODE!!!"; $IOCPATH/$IOCNAME $IOCTEST; }
+
+
+
+

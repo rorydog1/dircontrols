@@ -1,0 +1,127 @@
+## Stream Device Protocol for the dg535 Stanford Research Systems delay and pulse generator
+## Rory Clarke 18/12/2015
+
+#Modified for the Prologix GPIB to ethernet adaptor (++read)
+# The DG535 takes a float that is 15 digits wide with 12 precision:
+# 123.123456789012
+# Unless you are working at 64 bits your precision may not be wide enough
+
+
+##############################################
+#Char input
+#
+
+OutTerminator   = CR LF;
+InTerminator   = CR;
+MaxInput = 0;
+
+#Generate an error for testing
+get_test{out "BAD"} 
+
+##############################################
+#Commands
+#
+
+#Clear
+get_CL {out "CL"}
+
+#Get errors and machine state
+get_ES {out "ES"; out "++read"; in "%8u"}
+get_IS {out "IS"; out "++read"; in "%8u"}
+
+#Set delay
+set_TD {out"DT%(\$1).1u,%(\$2).1u,%f"}
+get_TD {out"DT%(\$1).1u"; out "++read";  in "%(\$2)u,%(\$3)f"}
+
+#Set terminaion resistance
+set_TZ {out"TZ%(\$1).1u,%1u"}
+get_TZ {out"TZ%(\$1).1u"; out "++read";  in "%(\%2)u"}
+
+#Set output mtestode
+set_OM {out"OM%(\$1).1u,%1u"}
+
+#Set POL
+set_POL {out"OP%(\$1).1u,%u"}
+
+#Set AMP
+set_AMP {out"OA%(\$1).1u,%f"}
+
+#Set OFF
+set_OFF {out"OO%(\$1).1u,%f"}
+
+#Get params
+get_PARM {
+          out"OM%(\$1:\$2)u";out "++read"; 
+          in "%(\$1:\$3)u"; 
+          out"OA%(\$1:\$2)u";out "++read"; 
+          in "%(\$1:\$4)f";
+          out "OO%(\$1:\$2).1u";out "++read"; 
+          in "%(\$1:\$5)f"; 
+          out "OP%(\$1:\$2).1u";out "++read"; 
+          in "%(\$1:\$6)u"
+         }
+
+#Set trigger mode
+set_Trig {
+          out"TM%.1u";
+         }
+get_Trig {
+          out"TM";out "++read"; 
+          in "%(\$1)u"
+         }
+#Set external trigger volts
+set_ext_volts {
+          out"TL%f";
+         }
+get_ext_volts {
+          out"TL";out "++read"; 
+          in "%(\$1)f"
+         }
+
+#Set slope trigger
+set_trig_slope {
+          out"TS%.1u";
+         }
+get_trig_slope {
+          out"TS";out "++read"; 
+          in "%(\$1)u"
+         }
+
+#Set trigger rate. Put into SS, wait for 2 secs to let triggers settle, change back 
+set_freq_int {
+          out"TM0;TR0,%f";
+          wait 200;
+          out"TM(\$1)"
+         }
+
+set_freq_burst {
+          out"TM0;TR1,%f";
+          wait 200;
+          out"TM(\$1)"
+         }
+
+set_burst_count {
+          out"BC,%u";
+         }
+
+set_burst_period {
+          out"BP,%u";
+         }
+
+get_rate_inf {
+          out"TR0";out "++read"; 
+          in "%(\$1:\$2)f";
+          out"TR1";out "++read"; 
+          in "%(\$1:\$3)f";
+          out"BC";out "++read"; 
+          in "%(\$1:\$4)f";
+          out"BP";out "++read"; 
+          in "%(\$1:\$5)f"
+         }
+
+#Fire single shot
+fire_SS {
+          out"SS";
+         }
+
+
