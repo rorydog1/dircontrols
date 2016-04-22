@@ -1,0 +1,45 @@
+set height 0
+
+break rgamv2.cpp:1300
+  commands
+    printf "Reading: %e, Index: %d\n", reading, index
+    continue
+  end
+
+break rgamv2.cpp:1301 if index > 99
+  commands
+    printf "Jumping...\n"
+    set index = 6414
+    continue
+  end
+
+break rgamv2.cpp:1543 if index > 3
+ commands
+  p barResultsData_
+  set index = barResultsData_.size()
+  p index
+ continue
+ end
+
+break rgamv2.cpp:1548
+
+#Try to find where analogResultsData_ reads out 
+break rgamv2.cpp:2004
+ commands
+  p reason
+#  p P_SUMP
+#  p P_TOTP
+#  p P_ANA
+#  p P_BAR
+  continue
+ end
+
+break rgamv2:1577
+commands
+continue
+end
+
+
+
+
+

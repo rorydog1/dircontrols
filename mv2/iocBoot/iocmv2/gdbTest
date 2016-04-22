@@ -1,0 +1,23 @@
+set height 0
+run st.cmd
+
+#delete breakpoints
+
+#Read data
+break rgamv2.cpp:1300
+commands
+printf "Reading: %e, Index: %d\n", reading, index
+continue
+end
+
+#Check for scan complete
+break rgamv2.cpp:1451
+commands
+printf "Headstatus: %s, Scandata size: %d\n", headState_.status(), scanData_.size()
+continue
+end
+
+#disable breakpoint 1
+
+
+

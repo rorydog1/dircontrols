@@ -1446,7 +1446,11 @@ void MV2::processFilamentInfo(const std::string & notification)
 
 
 void MV2::scanComplete()
-{
+{   
+//! MV2::scanComplete(): Resize arrays
+/*!
+After scan has finished, resize arrays. 50-200 for barReusltsData_ and 200*pointsPerPeak_for analogResultsData_
+*/
     switch (headState_.status())
     {
     case BARCHART_50:
@@ -1471,6 +1475,7 @@ void MV2::scanComplete()
         currentData_ = ANALOG200;
         barResultsData_.resize(200);
         analogResultsData_.resize(scanData_.size());
+
         break;
 
 #if PEAK_JUMP_SUPPORT
@@ -1496,6 +1501,10 @@ void MV2::scanComplete()
     // cut-off partial pressures below threshold as per MV Plus.
     const double MIN_PRESSURE = 1.0e-12;
 
+//! MV2::scanComplete() Calculate total pressure
+/*!
+For barResultsData find the total pressure. Also set array pressures < MIN_PRESSURE to MIN_PRESSURE
+*/
     switch (headState_.status())
     {
     case BARCHART_50:
@@ -1531,14 +1540,16 @@ void MV2::scanComplete()
                         static_cast<unsigned>(offset));
                 }
             }
-
-            std::copy(scanData_.begin(), scanData_.end(), analogResultsData_.begin());
-
             barResultsData_[index] = std::max(result, MIN_PRESSURE);
             asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
                  "(%s) %u %g %g\n", portName, static_cast<unsigned>(index), result, barResultsData_[index]);
             sumP_ += barResultsData_[index];
         }
+//!  analogResultsData_Line moved
+/*!
+analogResultsData_ moved out of inner loop to stop repeat filling
+*/
+        std::copy(scanData_.begin(), scanData_.end(), analogResultsData_.begin());
         break;
 
 #if PEAK_JUMP_SUPPORT
