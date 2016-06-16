@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Build the rga start files from the template
+SN=("MKS104-90616001" "MKS104-90616004" "MKS104-90616006" "MKS104-90616008")
+PIN=("L1" "L2" "L3" "L4")
+POU=("O1" "O2" "O3" "O4")
+DEV=("rga1" "rga2" "rga3" "rga4")
+rm st_rga_*.cmd
+var=0
+for i in "${SN[@]}"
+do
+fno=$((var+1))
+sed    's/<SN>/'${SN[$var]}'/g' st_template.cmd > st_rga_$fno.cmd
+sed -i 's/<PIN>/'${PIN[$var]}'/g' st_rga_$fno.cmd
+sed -i 's/<POU>/'${POU[$var]}'/g' st_rga_$fno.cmd
+sed -i 's/<DEV>/'${DEV[$var]}'/g' st_rga_$fno.cmd
+chmod a+x st_rga_$fno.cmd
+var=$((var+1))
+done
+
+#Startup all the RGAs
+

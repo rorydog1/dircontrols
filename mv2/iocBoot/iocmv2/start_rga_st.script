@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+
+#Startup all the RGAs using screen
+killall screen
+#screen -d -m ./st_rga_1.cmd
+#screen -d -m ./st_rga_2.cmd
+#screen -d -m ./st_rga_3.cmd
+#screen -d -m ./st_rga_4.cmd
+
+screen -d -m ./st_rga_combined.cmd
+

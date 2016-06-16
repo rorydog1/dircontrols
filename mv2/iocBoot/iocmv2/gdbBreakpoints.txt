@@ -24,13 +24,11 @@ break rgamv2.cpp:1543 if index > 3
 break rgamv2.cpp:1548
 
 #Try to find where analogResultsData_ reads out 
-break rgamv2.cpp:2004
+break rgamv2.cpp:2012
  commands
   p reason
-#  p P_SUMP
-#  p P_TOTP
-#  p P_ANA
-#  p P_BAR
+  p analogResultsData_.size()
+  p analogResultsData_
   continue
  end
 

@@ -163,7 +163,7 @@ record(calc, "$(device):DIS50")
 }
 #
 #% archiver 10 Monitor
-#
+#Removed
 record(calc, "$(device):DIS20")
 {
     field(DESC, "Disable Select")
@@ -171,7 +171,7 @@ record(calc, "$(device):DIS20")
     field(INPA, "$(device):STA")
     field(FLNK, "$(device):DISANA")
 }
-#
+#Removed
 record(calc, "$(device):DISANA")
 {
     field(DESC, "Disable Select")
@@ -334,6 +334,15 @@ record(bo, "$(device):SETSCAN")
     field(ZNAM, "Single")
     field(ONAM, "Continuous")
 }
+
+record(ai, "$(device):PERSCANNED")
+{
+    field(DESC, "Scan Mode")
+    field(SCAN, "1 second")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))PERSCANNED")
+}
+
 #
 ################################################################################
 # Control Mode Status
@@ -5664,13 +5673,15 @@ record(calc, "$(device):LOG:M200")
     field(LOPR, "-11")
 }
 #
+
+# SDIS fields removed and changed to Passive for use with single shot
 record(waveform, "$(device):BAR")
 {
     field(DESC, "Barchart readings")
     field(DTYP, "asynFloat64ArrayIn")
     field(INP,  "@asyn($(PORT))BAR")
-    field(SCAN, "10 second")
-    field(SDIS, "$(device):DIS50")
+    field(SCAN, "5 second")
+#    field(SDIS, "$(device):PERSCAN.MLIS")
     field(FTVL, "DOUBLE")
     field(NELM, "200")
     field(PINI, "YES")
@@ -5681,8 +5692,8 @@ record(waveform, "$(device):ANA")
     field(DESC, "Analog readings")
     field(DTYP, "asynFloat64ArrayIn")
     field(INP,  "@asyn($(PORT))ANA")
-    field(SCAN, "10 second")
-    field(SDIS, "$(device):DISANA")
+    field(SCAN, "5 second")
+#    field(SDIS, "$(device):DISANA")
     field(FTVL, "DOUBLE")
     field(NELM, "6415")
 }

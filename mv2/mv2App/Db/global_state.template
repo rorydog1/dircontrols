@@ -1,0 +1,61 @@
+#Set a global state of all the RGAs
+#Only works if the RGAs are active
+################################################################################
+#
+
+
+#Set RGAs bar scan start:
+#set mode to scan bar on display
+#set ai record = 1
+#Set scan = 15 min
+
+#On scan:
+#RGA stop
+#RGA set Faraday
+#RGA set bar
+#RGA set single scan
+#RGA scan bar if rec = 1-3
+#RGA scan ana if rec = 4
+#RGA copy RGA records to ARCHIVER records (or trigger archiver to read)
+#If rec > 4 rec = 1
+
+
+record(bo, "$(device):ARCH")
+{
+    field(DESC, "Start Archiver")
+    field(OUT,  "$(device):CON")
+    field(FLNK, "$(device):SCAN")
+}
+
+
+
+
+
+
+
+
+
+record(mbbi, "$(device):CON")
+{
+    field(DESC, "Head Status")
+    field(NOBT, "4")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(FVVL, "5")
+    field(SXVL, "6")
+    field(SVVL, "7")
+    field(EIVL, "8")
+    field(ZRST, "NONE")
+    field(ONST, "STOPPED")
+    field(TWST, "BAR")
+    field(THST, "ANA")
+    field(FRST, "")
+    field(FVST, "")
+    field(SXST, "")
+    field(SVST, "")
+    field(EIST, "")
+
+}

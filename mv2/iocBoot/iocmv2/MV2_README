@@ -1,0 +1,4 @@
+Important note:
+Due to the simulation mode, this will not run if the MV2 has spaces in its name.
+Check by telnetting into the RGA (port 10014) and check with "Sensors"
+
