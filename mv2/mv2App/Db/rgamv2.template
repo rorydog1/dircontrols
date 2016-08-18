@@ -8,6 +8,32 @@
 #
 ################################################################################
 #
+#Archiving
+#
+# Scan type
+record(ao,"rga-arch:B$(device)")
+{
+       field(DESC,"Set archiving range")
+       field(OMSL,"closed_loop")
+       field(DOL,"rga-arch:raw")
+       field(VAL,"0")
+       field(OUT, "$(device):CON PP")
+
+}
+
+# Scan mode
+record(ao,"rga-arch:BS$(device)")
+{
+       field(DESC,"Set archiving scan")
+       field(OMSL,"closed_loop")
+       field(DOL,"rga-arch:SSraw")
+       field(VAL,"0")
+       field(OUT, "$(device):SETSCAN PP")
+
+}
+
+
+#
 # Head Status
 #
 # % gui, $(name=), sevr

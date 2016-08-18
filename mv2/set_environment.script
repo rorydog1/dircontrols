@@ -9,15 +9,12 @@
 #export EPICS_CA_AUTO_ADDR_LIST=NO
 #export EPICS_CA_ADDR_LIST=localhost
 
-#Config support TOP
-export EPICS_SUPPORT="/home/rory/Desktop/controls/support"
-export ASYN="$EPICS_SUPPORT/asyn4-27/"
-
 #Config EPICS Base TOP
 export EPICS_CA_MAX_ARRAY_BYTES=10000000
 export EPICS_BASE="/home/rory/Desktop/epics/base/"
-export EPICS_HOST_ARCH="linux-x86_64-debug"
+export EPICS_HOST_ARCH="linux-x86_64"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${EPICS_BASE}/lib/${EPICS_HOST_ARCH}"
 export PATH=$PATH":"$EPICS_BASE"/bin/linux-x86_64"
-
+# Add edm and  msi
+export PATH=$PATH":/home/rory/Desktop/epics/extensions/bin/linux-x86_64"
 

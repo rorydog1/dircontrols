@@ -1,0 +1,346 @@
+#Set a global state of all the RGAs
+#Only works if the RGAs are active
+################################################################################
+#
+
+
+#Set RGAs bar scan start:
+#set mode to scan bar on display
+
+#$(rga-arch) then:
+#On to start barchart in continuous mode
+#Off to stop scans
+#SSOn/SSOff set single scan mode
+#TimerOn/TimerOff
+#ArchiveOn to start archiving
+#FilOn/FilOff to power filaments
+#FilPow = 0 when all filaments are on
+#sectimer seconds until scan finished
+#TmO Ana timeout (300 sec)
+#TimerRst.PROC reset timer
+
+##Internal
+#TimerRaw timer state
+#raw scan mode
+
+#Start archive
+
+record(seq,"$(rga-arch):ArchiveOn")
+{
+       field(DESC,"Start Archiving PP")
+       field(DO1,"0")
+       field(LNK1, "$(rga-arch):raw.PROC PP")     #All stop
+       field(LNK2, "$(rga-arch):TimerRst.PROC")   #Reset timer 
+       field(LNK3, "$(rga-arch):FilOn.PROC PP")   #Power up rga filaments. 
+
+       field(DLY4, "3.0") #Give filaments 3 secs warmup time
+       field(DLY5, "3.0") 
+       field(DLY6, "3.0") 
+       field(LNK4, "$(rga-arch):On.PROC PP" )      #Start bar
+       field(LNK5, "$(rga-arch):SSOff.PROC PP" )   #SS off
+       field(LNK6, "$(rga-arch):TimerOn.PROC PP")  #Start timer
+}
+
+#
+#Gui interface
+#
+
+record(stringin, "$(rga-arch):TimerRaw:T") {
+  field(DTYP, "Soft Timestamp")
+  field(TSEL, "$(rga-arch):TimerRaw.TIME CP")
+  field(INP, "@%b %d %Y %H:%M")
+}
+
+record (ai, "$(rga-arch):TmO")
+{
+        field(DESC,"Ana scan timeout")
+        field(VAL,"500")
+}
+
+record(calc,"$(rga-arch):sectime")
+{
+      field(INPA,"$(rga-arch):timer")
+      field(CALC, "3601-A")
+      field(SCAN, "1 second")
+}
+
+record(dfanout,"$(rga-arch):FilOn")
+{
+       field(VAL, "1")
+       field(OUTA, "rga1:FILCON PP" ) 
+       field(OUTB, "rga2:FILCON PP" )    
+       field(OUTC, "rga3:FILCON PP") 
+       field(OUTD, "rga4:FILCON PP")
+}
+
+record(dfanout,"$(rga-arch):FilOff")
+{
+       field(VAL, "0")
+       field(DESC, "Power down filaments")
+       field(OUTA, "rga1:FILCON PP" ) 
+       field(OUTB, "rga2:FILCON PP" )    
+       field(OUTC, "rga3:FILCON PP") 
+       field(OUTD, "rga4:FILCON PP")
+}
+
+record(ao,"$(rga-arch):On")
+{
+       field(DESC,"BAR 200 On")
+       field(VAL,"7")
+       field(OUT, "$(rga-arch):raw PP")
+}
+
+
+
+record(ao,"$(rga-arch):TimerOn")
+{
+       field(DESC,"ANA 200 On")
+       field(VAL,"1")
+       field(OUT, "$(rga-arch):TimerRaw PP")
+       field(FLNK, "$(rga-arch):TimerRaw")
+
+}
+
+record(ao,"$(rga-arch):TimerOff")
+{
+       field(DESC,"Reset timer")
+       field(VAL,"0")
+       field(OUT, "$(rga-arch):TimerRaw PP")
+       field(FLNK, "$(rga-arch):TimerRaw")
+
+}
+
+record(dfanout,"$(rga-arch):Off")
+{
+       field(DESC,"Off record")
+       field(VAL,"0")
+       field(OUTA, "$(rga-arch):raw PP") #Make stop
+       field(OUTB, "$(rga-arch):TimerOff PP") #Kill timer
+}
+
+record(ao,"$(rga-arch):SSOn")
+{
+       field(DESC,"SS on")
+       field(VAL,"0")
+       field(OUT, "$(rga-arch):SSraw PP")
+       field(FLNK, "$(rga-arch):SSfan")
+
+}
+
+record(ao,"$(rga-arch):SSOff")
+{
+       field(DESC,"SS off")
+       field(VAL,"1")
+       field(OUT, "$(rga-arch):SSraw PP")
+       field(FLNK, "$(rga-arch):SSfan")
+
+}
+
+
+#
+#Scan mode
+#
+
+record(ao,"$(rga-arch):raw")
+{
+       field(DESC,"Bar 200 or ANA 200")
+       field(VAL,"0")
+       field(FLNK, "$(rga-arch):fan")
+
+}
+
+record(ao,"$(rga-arch):SSraw")
+{
+       field(DESC,"Bar 200")
+       field(VAL,"0")
+}
+
+record(ao,"$(rga-arch):TimerRaw")
+{
+       field(DESC,"Bar 200")
+       field(VAL,"0")
+}
+
+
+#
+#Timer
+#
+
+record(ao,"$(rga-arch):TimerRst")
+{
+      field(DESC,"Reset the timer")
+      field(VAL,"1")
+      field(OUT,"$(rga-arch):timer NPP")
+}
+
+record(calcout, "$(rga-arch):timer")
+{
+       field(DESC,"Run an ANA scan per hour")
+       field(INPA,"$(rga-arch):timer")
+       field(INPB,"$(rga-arch):TimerRaw")
+       field(INPC,"3600") #Timer value for 1 hour
+       field(SCAN,"10 second")#test with .1, use 10 for hourly
+       field(CALC,"(B=1)?(A<C)?A+10:0:1") #If off set to one not zero to avoid false trigger
+       field(OOPT, "Transition To Zero")
+       field(OUT, "$(rga-arch):ANAOn PP")
+}
+
+#
+#Hourly analog scans. These are much slower and only run once per hour
+#
+
+record(seq,"$(rga-arch):ANAOn")
+{
+       field(DO1,"0") #Set single scan
+       field(LNK1, "$(rga-arch):SSOn PP")
+       field(LNK2, "$(rga-arch):TimerRst.PROC") #Reset timer
+       field(DOL3,"$(rga-arch):ANANo") #Set ana mode
+       field(LNK3, "$(rga-arch):raw PP")
+}
+
+record(calcout, "$(rga-arch):ANADone")
+{
+       field(DESC,"Has the ANA scan finished?")
+       field(INPA,"$(rga-arch):PerDone PP")
+       field(INPB,"$(rga-arch):ANANo")
+       field(INPE,"$(rga-arch):raw")
+       field(INPF,"$(rga-arch):TimerRaw")
+       field(SCAN,"10 second")
+       field(CALC,"(F=1&&E=B)?A:1") #If timer on(F) and ANA mode(E) then trigger when all scans (A-D=100%) are complete
+       field(OOPT, "Transition To Zero")
+       field(OUT, "$(rga-arch):ArchiveOn.PROC PP") #Restart barcharts
+}
+
+#
+#Check that the analog scan did not crash
+#
+
+record(ai,"$(rga-arch):LstTim")
+{
+       field(DESC,"Store current timer")
+       field(INP,"$(rga-arch):timer NPP") #Read timer 
+}
+
+
+
+record(calcout, "$(rga-arch):ANAFail")
+{
+       field(DESC,"Has the ANA scan failed?")
+       field(INPA,"$(rga-arch):LstTim PP")  #Did scan timeout?
+       field(INPB,"$(rga-arch):Crash PP")   #Did hardware fail?
+       field(INPC,"$(rga-arch):PerDone PP")    #Still scanning?
+       field(INPE,"$(rga-arch):raw")
+       field(INPF,"$(rga-arch):TimerRaw")
+       field(INPG,"$(rga-arch):TmO")# Timout
+       field(INPH,"$(rga-arch):ANANo")# Timout
+       field(SCAN,"10 second")
+       field(CALC,"(F=1&&E=H&&C#0)?(A>G||B#0)?0:1:1") #timeout if > 5 min ana scan or HW fails
+       field(OOPT, "Transition To Zero")
+       field(OUT, "$(rga-arch):ANATmO.PROC") #Count this fail
+
+}
+
+record(calcout, "$(rga-arch):ANATmO")
+{
+	field(DESC,"Number of timouts")
+        field(INPA,"$(rga-arch):ANATmO")
+        field(INPB,"$(rga-arch):LstTim")
+        field(INPC,"$(rga-arch):TmO")# Timout
+        field(CALC,"B>C?A+1:A")
+        field(OUT,"$(rga-arch):ANANumF.PROC")
+        field(OOPT, "Every Time")
+}
+
+record(calcout, "$(rga-arch):ANANumF")
+{
+	field(DESC,"Number of all ANA fails")
+        field(INPA,"$(rga-arch):ANANumF")
+        field(CALC,"A+1")
+        field(OOPT, "Every Time")
+        field(OUT,"$(rga-arch):ArchiveOn.PROC")#Restart
+}
+
+record(seq, "$(rga-arch):ANARst")
+{
+      field(DESC,"Rst counters")
+      field(DO1,"0")
+      field(LNK1,"$(rga-arch):ANANumF")
+      field(DO2,"0")
+      field(LNK2,"$(rga-arch):ANATmO")
+}
+
+#
+#RGA monitor input
+#
+
+record(calc,"$(rga-arch):Crash")
+{
+      field(DESC,"Test=0 when working up")
+      field(CALC,"(A=1)&&(B=C)?0:1")# when all filaments up and heads match scan state = 0
+      field(INPA,"$(rga-arch):FilPow PP")
+      field(INPB,"$(rga-arch):Head PP")
+      field(INPC,"$(rga-arch):raw")
+      field(VAL,"1")
+}
+
+record(calc,"$(rga-arch):FilPow")
+{
+      field(DESC,"Test=0 when filaments up")
+      field(CALC,"(A=B)&&(C=D)&&(B=C)?A:15")#combined fil stat or 15
+      field(INPA,"$(device1):FILSTA")
+      field(INPB,"$(device2):FILSTA")
+      field(INPC,"$(device3):FILSTA")
+      field(INPD,"$(device4):FILSTA")
+      field(VAL,"1")
+}
+
+record(calc,"$(rga-arch):Head")
+{
+      field(DESC,"Test=0 when filaments up")
+      field(CALC,"(A=B)&&(B=C)&&(B=D)?A:15")#combined head status or 15
+      field(INPA,"$(device1):HEADSTA")
+      field(INPB,"$(device2):HEADSTA")
+      field(INPC,"$(device3):HEADSTA")
+      field(INPD,"$(device4):HEADSTA")
+      field(VAL,"1")
+}   
+
+record(calc,"$(rga-arch):PerDone")
+{
+       field(DESC,"Percentage all 100?")
+       field(INPA,"$(device1):PERSCANNED")
+       field(INPB,"$(device2):PERSCANNED")
+       field(INPC,"$(device3):PERSCANNED")
+       field(INPD,"$(device4):PERSCANNED")
+       field(INPE,"400")# Total percentage
+       field(CALC,"A+B+C+D=E?0:2")
+}
+
+#Switch on all the RGAs in correct mode
+record(fanout,"$(rga-arch):fan")
+{
+       field(DESC,"set rgas")
+       field(LNK1, "$(rga-arch):B$(device1) PP" )
+       field(LNK2, "$(rga-arch):B$(device2) PP" )
+       field(LNK3, "$(rga-arch):B$(device3) PP" )
+       field(LNK4, "$(rga-arch):B$(device4) PP" )
+}
+
+#Switch on all the RGAs correct scan
+record(fanout,"$(rga-arch):SSfan")
+{
+       field(DESC,"set rgas")
+       field(LNK1, "$(rga-arch):BS$(device1) PP" )
+       field(LNK2, "$(rga-arch):BS$(device2) PP" )
+       field(LNK3, "$(rga-arch):BS$(device3) PP" )
+       field(LNK4, "$(rga-arch):BS$(device4) PP" )
+}
+
+
+#
+##Debug
+#
+record(ai,$(rga-arch):ANANo)
+{
+       field(VAL,"8") #Ana mode 8, debug 6
+}

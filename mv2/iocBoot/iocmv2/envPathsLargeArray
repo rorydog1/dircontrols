@@ -1,4 +1,4 @@
-epicsEnvSet("EPICS EPICS_CA_MAX_ARRAY_BYTES","1000000")
+epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES","1000000")
 epicsEnvSet("ARCH","linux-x86_64")
 epicsEnvSet("IOC","iocmv2")
 epicsEnvSet("TOP","/home/rory/Desktop/controls/mv2")

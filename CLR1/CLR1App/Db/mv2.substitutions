@@ -1,0 +1,16 @@
+#
+# IOC stuff
+#
+file global_state.template
+{
+    pattern { rga-arch device1, device2, device3, device4 }
+            { rga-arch rga1, rga2, rga3, rga4 }
+}
+file rgamv2.template
+{
+    pattern { device, PORT }
+            {rga1, A1}
+            {rga2, A2}
+            {rga3, A3}
+            {rga4, A4}
+}

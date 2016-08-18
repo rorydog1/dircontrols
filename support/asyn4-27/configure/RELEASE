@@ -1,6 +1,5 @@
 #RELEASE Location of external products
 
-SUPPORT=/home/controls/support
 -include $(TOP)/../configure/SUPPORT.$(EPICS_HOST_ARCH)
 
 #  IPAC is only necessary if support for Greensprings IP488 is required

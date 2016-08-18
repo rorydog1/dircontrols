@@ -16,6 +16,8 @@ include $(TOP)/configure/CONFIG
 DB += rgaGroup.template
 DB += rgamv2.template
 DB += asynRgaRec.template
+DB += global_state.template
+
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Build the rga start file from the template
-SN=("MKS104-90616001" "MKS104-90616004" "MKS104-90616006" "MKS104-90616008")
+SN=("MKS104-90716010" "MKS104-90716011" "MKS104-90716012" "MKS104-90716013")
 
 rm st_rga_*.cmd
 sed    's/<SN1>/'${SN[0]}'/g;s/<SN2>/'${SN[1]}'/g;s/<SN3>/'${SN[2]}'/g;s/<SN4>/'${SN[3]}'/g;' st_single_ioc.cmd > st_rga_combined.cmd

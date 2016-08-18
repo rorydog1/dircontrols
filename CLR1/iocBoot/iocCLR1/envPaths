@@ -1,0 +1,7 @@
+epicsEnvSet("ARCH","linux-x86_64")
+epicsEnvSet("IOC","iocCLR1")
+epicsEnvSet("TOP","/home/rory/Desktop/controls/CLR1")
+epicsEnvSet("SUPPORT","/home/rory/Desktop/controls/support/")
+epicsEnvSet("ASYN","/home/rory/Desktop/controls/support//asyn4-27")
+epicsEnvSet("MV2","/home/rory/Desktop/controls/support//mv2/1-0")
+epicsEnvSet("EPICS_BASE","/home/rory/Desktop/epics/base/")
